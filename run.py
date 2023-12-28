@@ -6,6 +6,7 @@ from dqn.agent import DQNAgent
 from dqn.trainer import Trainer
 from torch.optim import Adam
 from torch.nn import MSELoss
+from datetime import datetime
 
 # Parameters
 MEAN_REWARD_BOUND = 19
@@ -34,10 +35,24 @@ optimizer = Adam(agent.dqn.parameters(), LEARNING_RATE, (0.9, 0.999))
 criterion = MSELoss(reduction='mean').to(device)
 trainer = Trainer(env, agent, optimizer, criterion, GAMMA, BATCH_SIZE, REPLAY_SIZE, device)
 
-trainer.init_memory()
+trainer.init_memory_fixed_states(200)
 
 # env = gym.make("ALE/Pong-v5", obs_type='grayscale', frameskip=4, render_mode='human')
 # env = wrap(env)
 # trainer.env = env
 
-print(trainer.fit(5))
+
+training_start = datetime.now()
+print('Started training at:')
+print(training_start.strftime("%d/%m/%Y %H:%M:%S"))
+
+_, best_reward, episode = trainer.fit(10_000)
+
+print(f'Done in {episode} episodes | Best reward: {best_reward}')
+
+training_end = datetime.now()
+print('Finished training at:')
+print(training_end.strftime("%d/%m/%Y %H:%M:%S"))
+
+print('Time training:')
+print(training_end - training_start)

@@ -17,7 +17,15 @@ class Trainer:
 
         self.replay_memory = deque(maxlen=memory_capacity)
 
-    def init_memory(self):
+
+        self.total_rewards = []
+        self.mean_average_rewards = []
+        self.fixed_states = []
+        self.fixed_states_q = []
+        self.epsilons = []
+        self.best_rewards = []
+
+    def init_memory_fixed_states(self, n_states):
 
         new_state, info = self.env.reset()
 
@@ -39,10 +47,21 @@ class Trainer:
 
             if terminated or truncated:
                 new_state, info = self.env.reset()
+
+        
+        fixed_states_idx = torch.randperm(len(self.replay_memory))[:n_states]
+        fixed_states = [self.replay_memory[idx] for idx in fixed_states_idx]
+        self.fixed_states = [sample['state'] for sample in fixed_states]
+
+    def calc_mean_max_q_on_fixed_states(self):
+
+        states = torch.stack(self.fixed_states)
+        with torch.no_grad():
+            qs = self.agent.dqn(states)
+        return (qs.max(dim=1)[0]).mean().item()
             
     def fit(self, n_episodes):
 
-        total_rewards = []
         best_reward = -1e9
 
         for episode in range(n_episodes):
@@ -97,22 +116,38 @@ class Trainer:
                 if terminated or truncated:
                     break
 
-            total_rewards.append(total_reward)
-            with open('total_rewards.txt', 'w') as f:
-                f.writelines([str(r) for r in total_rewards])
+            mean_max_q = self.calc_mean_max_q_on_fixed_states()
+            self.fixed_states_q.append(mean_max_q)
+            with open('fixed_states_q.txt', 'w') as f:
+                f.write("\n".join([str(r) for r in self.fixed_states_q]))
 
-            print(f'Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {sum(total_rewards[-100:])/min(len(total_rewards), 100):.3f} | Epsilon: {self.agent.get_epsilon(episode):.3f}')
+            self.total_rewards.append(total_reward)
+            with open('total_rewards.txt', 'w') as f:
+                f.write("\n".join([str(r) for r in self.total_rewards]))
+
+            mean_average_reward = sum(self.total_rewards[-100:])/min(len(self.total_rewards), 100)
+            self.mean_average_rewards.append(mean_average_reward)
+            with open('mean_average_rewards.txt', 'w') as f:
+                f.write("\n".join([str(r) for r in self.mean_average_rewards]))
+
+            self.epsilons.append(self.agent.get_epsilon(episode))
+            with open('epsilons.txt', 'w') as f:
+                f.write("\n".join([str(r) for r in self.epsilons]))
+
+            print(f'Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(episode):.3f} | Mean max q: {mean_max_q}')
 
             if total_reward > best_reward:
                 best_reward = total_reward
-                # self.agent.target_dqn = deepcopy(self.agent.dqn).to(self.device)
-                # self.agent.target_dqn.eval()
-                # for p in self.agent.target_dqn.parameters():
-                #     p.requires_grad = False
-                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict.pt')
 
-        return total_rewards
+                tr = int(total_reward)
+                name = f'dqn_state_dict_{tr}.pt' if total_reward > 18.5 else 'dqn_state_dict.pt'
+                torch.save(self.agent.dqn.state_dict(), name)
 
+            self.best_rewards.append(best_reward)
+            with open('best_rewards.txt', 'w') as f:
+                f.write("\n".join([str(r) for r in self.best_rewards]))
 
-    def eval(self, n_episodes):
-        pass
+            if tr==20:
+                return self.total_rewards, best_reward, (episode+1)
+
+        return self.total_rewards, best_reward, (episode+1)

@@ -33,18 +33,23 @@ class FireResetEnv(Wrapper):
 
 class Reshape(ObservationWrapper):
 
-    def __init__(self, env: Env, n_pixels):
+    def __init__(self, env: Env, resize_height, resize_width):
         super().__init__(env)
 
-        self.n_pixels = n_pixels
+        self.resize_height = resize_height
+        self.resize_width = resize_width
         self.observation_space = Box(
-            np.zeros((n_pixels, n_pixels)),
-            255 * np.ones((n_pixels, n_pixels)),
+            np.zeros((resize_width, resize_width)),
+            255 * np.ones((resize_width, resize_width)),
             dtype=np.uint8
         )
 
     def observation(self, observation: Any) -> Any:
-        return cv2.resize(observation, (self.n_pixels, self.n_pixels)) # NOTE: Not taking center
+
+        resized_obs = cv2.resize(observation, (self.resize_width, self.resize_height))
+        resize_diff = (self.resize_height - self.resize_width) // 2
+        obs = resized_obs[resize_diff:-resize_diff, :]
+        return obs
     
 class Normalize(ObservationWrapper):
 
@@ -92,7 +97,7 @@ class Numpy2Torch(ObservationWrapper):
 
 def wrap(env):
     #env = FireResetEnv(env)
-    env = Reshape(env, 84)
+    env = Reshape(env, 110, 84)
     env = Normalize(env)
     env = Stack(env, 4)
     env = Numpy2Torch(env)
