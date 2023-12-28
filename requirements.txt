@@ -4,3 +4,4 @@ opencv-python
 gymnasium
 gymnasium[atari]
 gymnasium[accept-rom-license]
+moviepy
