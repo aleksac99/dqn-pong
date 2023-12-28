@@ -147,7 +147,8 @@ class Trainer:
             with open('best_rewards.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.best_rewards]))
 
-            if tr==20:
+            if mean_average_reward>19.:
+                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict_mar.pt')
                 return self.total_rewards, best_reward, (episode+1)
 
         return self.total_rewards, best_reward, (episode+1)
