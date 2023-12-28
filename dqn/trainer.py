@@ -55,7 +55,7 @@ class Trainer:
 
     def calc_mean_max_q_on_fixed_states(self):
 
-        states = torch.stack(self.fixed_states)
+        states = torch.stack(self.fixed_states).to(self.device)
         with torch.no_grad():
             qs = self.agent.dqn(states)
         return (qs.max(dim=1)[0]).mean().item()
