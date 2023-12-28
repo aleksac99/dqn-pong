@@ -21,6 +21,8 @@ EPSILON_END = 0.01
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+print(f'Device: {device}')
+
 env = gym.make("ALE/Pong-v5", obs_type='grayscale', frameskip=4)
 env = wrap(env)
 
