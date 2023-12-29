@@ -5,6 +5,7 @@ from dqn.model import DQN
 from dqn.agent import DQNAgent
 from dqn.trainer import Trainer
 from torch.optim import Adam
+from torch.optim.lr_scheduler import StepLR
 from torch.nn import MSELoss
 from datetime import datetime
 
@@ -12,9 +13,9 @@ from datetime import datetime
 MEAN_REWARD_BOUND = 19
 
 GAMMA = 0.99
-BATCH_SIZE = 32
-REPLAY_SIZE = 10_000
-LEARNING_RATE = 5e-5
+BATCH_SIZE = 2048
+REPLAY_SIZE = 50_000
+LEARNING_RATE = 1e-4
 
 EPSILON_DECAY = 0.9
 EPSILON_START = 1.0
@@ -33,7 +34,8 @@ agent = DQNAgent(
     EPSILON_START, EPSILON_DECAY, EPSILON_END, device=device)
 optimizer = Adam(agent.dqn.parameters(), LEARNING_RATE, (0.9, 0.999))
 criterion = MSELoss(reduction='mean').to(device)
-trainer = Trainer(env, agent, optimizer, criterion, GAMMA, BATCH_SIZE, REPLAY_SIZE, device)
+lr_scheduler = StepLR(optimizer, step_size=10, gamma=0.9)
+trainer = Trainer(env, agent, optimizer, criterion, lr_scheduler, GAMMA, BATCH_SIZE, REPLAY_SIZE, device)
 
 trainer.init_memory_fixed_states(200)
 

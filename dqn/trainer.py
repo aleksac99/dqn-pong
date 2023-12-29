@@ -5,7 +5,7 @@ import torch
 
 class Trainer:
 
-    def __init__(self, env, agent, optimizer, criterion, gamma, batch_size, memory_capacity, device) -> None:
+    def __init__(self, env, agent, optimizer, criterion, gamma, lr_scheduler, batch_size, memory_capacity, device) -> None:
         
         self.env = env
         self.agent = agent
@@ -14,6 +14,7 @@ class Trainer:
         self.gamma = gamma
         self.batch_size = batch_size
         self.device = device
+        self.lr_scheduler = lr_scheduler
 
         self.replay_memory = deque(maxlen=memory_capacity)
 
@@ -115,6 +116,8 @@ class Trainer:
 
                 if terminated or truncated:
                     break
+
+            self.lr_scheduler.step()
 
             mean_max_q = self.calc_mean_max_q_on_fixed_states()
             self.fixed_states_q.append(mean_max_q)
