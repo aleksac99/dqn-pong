@@ -5,7 +5,7 @@ import torch
 
 class Trainer:
 
-    def __init__(self, env, agent, optimizer, criterion, gamma, lr_scheduler, batch_size, memory_capacity, device) -> None:
+    def __init__(self, env, agent, optimizer, criterion, lr_scheduler, gamma, batch_size, memory_capacity, device) -> None:
         
         self.env = env
         self.agent = agent
