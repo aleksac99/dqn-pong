@@ -17,7 +17,7 @@ class DQNAgent:
         self.device = device
 
     def get_epsilon(self, episode):
-        return max(self.epsilon_end, self.epsilon_start - episode * (self.epsilon_start-self.epsilon_end)/100.)
+        return max(self.epsilon_end, self.epsilon_start - episode * (self.epsilon_start-self.epsilon_end)/300.)
 
     def get_action(self, state, method, actions, episode):
 
