@@ -4,20 +4,18 @@ import torch
 
 class DQNAgent:
 
-    def __init__(self, dqn, epsilon_start, epsilon_decay, epsilon_end, device) -> None:
+    def __init__(self, dqn, epsilon_start, epsilon_decay_limit, epsilon_end, device) -> None:
         
         self.epsilon_start = epsilon_start
         self.epsilon_end = epsilon_end
-        self.epsilon_decay = epsilon_decay
+        self.epsilon_decay_limit = epsilon_decay_limit
         self.dqn = dqn.to(device)
-        self.target_dqn = deepcopy(self.dqn).to(device) # TODO: Don't deepcopy - initialize new net!
+        self.target_dqn = deepcopy(self.dqn).to(device)
         self.target_dqn.eval()
-        # for p in self.target_dqn.parameters():
-        #     p.requires_grad = False
         self.device = device
 
     def get_epsilon(self, time):
-        return max(self.epsilon_end, self.epsilon_start - time / 150_000)
+        return max(self.epsilon_end, self.epsilon_start - time / self.epsilon_decay_limit)
 
     def get_action(self, state, method, actions, time):
 

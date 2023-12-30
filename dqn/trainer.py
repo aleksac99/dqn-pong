@@ -1,11 +1,25 @@
+import os
 from copy import deepcopy
 from collections import deque
 import torch
 
+from .utils import Logger
+
 
 class Trainer:
 
-    def __init__(self, env, agent, optimizer, criterion, lr_scheduler, gamma, batch_size, memory_capacity, device) -> None:
+    def __init__(
+            self,
+            env,
+            agent,
+            optimizer,
+            criterion,
+            lr_scheduler,
+            logger: Logger,
+            gamma,
+            batch_size,
+            memory_capacity,
+            device) -> None:
         
         self.env = env
         self.agent = agent
@@ -15,6 +29,7 @@ class Trainer:
         self.batch_size = batch_size
         self.device = device
         self.lr_scheduler = lr_scheduler
+        self.logger = logger
 
         self.replay_memory = deque(maxlen=memory_capacity)
 
@@ -62,12 +77,12 @@ class Trainer:
             qs = self.agent.dqn(states)
         return (qs.max(dim=1)[0]).mean().item()
             
-    def fit(self, n_episodes):
+    def fit(self, max_n_episodes, target_dqn_update_after, ma_reward_n_episodes, dqn_state_dict_name):
 
         best_mean_reward = -1e9
         time = 0
 
-        for episode in range(n_episodes):
+        for episode in range(max_n_episodes):
 
             total_reward = 0.
             next_state, info = self.env.reset()
@@ -78,9 +93,8 @@ class Trainer:
 
                 cur_state = next_state.unsqueeze(0)
                 with torch.no_grad():
-                    action = self.agent.get_action(cur_state, method='eps_greedy', actions=self.env.action_space, time=time) # NOTE: with torch.no_grad()?
+                    action = self.agent.get_action(cur_state, method='eps_greedy', actions=self.env.action_space, time=time)
                 next_state, reward, terminated, truncated, info = self.env.step(action)
-                #self.env.render()
                 total_reward += reward
 
                 self.replay_memory.append({
@@ -100,7 +114,6 @@ class Trainer:
                 terminals = ~torch.tensor([sample['terminal'] for sample in mini_batch]).to(self.device)
 
                 with torch.no_grad():
-                    #targets = (rewards + self.gamma * torch.max(self.agent.dqn(next_states), 1)[0] * terminals).detach()
                     targets = (rewards + self.gamma * torch.max(self.agent.target_dqn(next_states), 1)[0] * terminals).detach()
 
                 preds = self.agent.dqn(cur_states)[torch.arange(self.batch_size), actions]
@@ -111,7 +124,7 @@ class Trainer:
                 loss.backward()
                 self.optimizer.step()
 
-                if time % 1_000 == 0:
+                if time % target_dqn_update_after == 0:
                     self.agent.target_dqn = deepcopy(self.agent.dqn).to(self.device)
                     self.agent.target_dqn.eval()
 
@@ -122,31 +135,34 @@ class Trainer:
 
             mean_max_q = self.calc_mean_max_q_on_fixed_states()
             self.fixed_states_q.append(mean_max_q)
-            with open('fixed_states_q.txt', 'w') as f:
-                f.write("\n".join([str(r) for r in self.fixed_states_q]))
+            self.logger.log_fixed_states_q(self.fixed_states_q)
 
             self.total_rewards.append(total_reward)
-            with open('total_rewards.txt', 'w') as f:
-                f.write("\n".join([str(r) for r in self.total_rewards]))
+            self.logger.log_rewards(self.total_rewards)
 
-            moving_average_reward = sum(self.total_rewards[-100:])/min(len(self.total_rewards), 100)
+            moving_average_reward = sum(self.total_rewards[-ma_reward_n_episodes:]) / min(len(self.total_rewards), ma_reward_n_episodes)
             self.mean_average_rewards.append(moving_average_reward)
-            with open('mean_average_rewards.txt', 'w') as f:
-                f.write("\n".join([str(r) for r in self.mean_average_rewards]))
+            self.logger.log_ma_rewards(self.mean_average_rewards)
 
             self.epsilons.append(self.agent.get_epsilon(time))
-            with open('epsilons.txt', 'w') as f:
-                f.write("\n".join([str(r) for r in self.epsilons]))
+            self.logger.log_epsilons(self.epsilons)
 
             print(f'Time: {time} | Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {moving_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
 
             if moving_average_reward > best_mean_reward:
+
                 best_mean_reward = moving_average_reward
 
-                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict_best_mar.pt')
+                torch.save(
+                    self.agent.dqn.state_dict(),
+                    os.path.join(self.logger.base_dir, dqn_state_dict_name))
 
-            if moving_average_reward>20.:
-                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict_mar20.pt')
-                return self.total_rewards, best_mean_reward, (episode+1)
+            if moving_average_reward > 20.:
 
-        return self.total_rewards, best_mean_reward, (episode+1)
+                torch.save(
+                    self.agent.dqn.state_dict(),
+                    os.path.join(self.logger.base_dir, dqn_state_dict_name))
+                
+                return self.total_rewards, best_mean_reward, (episode + 1)
+
+        return self.total_rewards, best_mean_reward, (episode + 1)

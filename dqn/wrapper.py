@@ -7,30 +7,6 @@ from gymnasium.core import Env
 import cv2
 import torch
 
-
-class FireResetEnv(Wrapper):
-    def __init__(self, env=None):
-        """For environments where the user need to press FIRE for the game to start."""
-        super().__init__(env)
-        assert env.unwrapped.get_action_meanings()[1] == 'FIRE'
-        assert len(env.unwrapped.get_action_meanings()) >= 3
-
-    def step(self, action):
-        return self.env.step(action)
-
-    def reset(self, *args, **kwargs):
-        _, info = self.env.reset(*args, **kwargs)
-        obs, _, terminated, truncated, info = self.env.step(1)
-        done = terminated or truncated
-        if done:
-            _, info = self.env.reset(*args, **kwargs)
-        obs, _, terminated, truncated, info = self.env.step(2)
-        done = terminated or truncated
-        if done:
-            _, info = self.env.reset(*args, **kwargs)
-        return obs, info
-
-
 class Reshape(ObservationWrapper):
 
     def __init__(self, env: Env, resize_height, resize_width):
@@ -96,7 +72,6 @@ class Numpy2Torch(ObservationWrapper):
         
 
 def wrap(env):
-    #env = FireResetEnv(env)
     env = Reshape(env, 110, 84)
     env = Normalize(env)
     env = Stack(env, 4)
