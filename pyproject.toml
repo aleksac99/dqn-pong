@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dqn"]
+
+[project]
+name = "dqn-pong"
+version = "1.0"
+dependencies = [
+  "torch",
+  "numpy",
+  "opencv-python",
+  "gymnasium",
+  "gymnasium[atari]",
+  "gymnasium[accept-rom-license]",
+  "moviepy"
+]
+requires-python = ">=3.10"
+authors = [
+  {name = "Aleksa Cvetanović", email = "aleksa.cvetanovic99@gmail.com"},
+]
+maintainers = [
+  {name = "Aleksa Cvetanović", email = "aleksa.cvetanovic99@gmail.com"}
+]
+description = "My implementation of Deep Q Learning Algorithm for Pong."
+readme = "README.md"
+keywords = ["reinforcementlearning", "rl", "deepqlearning", "dqn", "atari", "pong"]
+classifiers = [
+  "Programming Language :: Python"
+]
+
+[project.scripts]
+dqn-pong = "dqn.__main__:main"
