@@ -24,7 +24,7 @@ class DQN(nn.Module):
 
     def _get_conv_out(self, shape):
         o = self.conv(torch.zeros(1, *shape))
-        return int(torch.prod(o.size()))
+        return torch.tensor(o.shape).prod().item()
 
     def forward(self, x):
         x = self.conv(x)

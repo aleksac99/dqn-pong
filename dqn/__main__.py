@@ -7,7 +7,7 @@ from torch.nn import MSELoss
 import gymnasium as gym
 
 from dqn.wrapper import wrap
-from dqn.model import DQN
+from dqn.model_original import DQN
 from dqn.agent import DQNAgent
 from dqn.trainer import Trainer
 from dqn.utils import parse_args, Config, Logger
