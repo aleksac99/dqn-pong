@@ -34,7 +34,9 @@ dqn = DQN(state.shape, env.action_space.n)
 
 if DQN_STATE_DICT is not None:
     dqn.load_state_dict(torch.load(DQN_STATE_DICT, map_location=device))
+    # TODO: DELETE THESE PARAMETER CHANGES
     LEARNING_RATE = 1e-5
+    EPSILON_START = 0.01
 
 agent = DQNAgent(
     dqn,
