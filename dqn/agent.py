@@ -10,7 +10,7 @@ class DQNAgent:
         self.epsilon_end = epsilon_end
         self.epsilon_decay = epsilon_decay
         self.dqn = dqn.to(device)
-        self.target_dqn = deepcopy(self.dqn).to(device)
+        self.target_dqn = deepcopy(self.dqn).to(device) # TODO: Don't deepcopy - initialize new net!
         self.target_dqn.eval()
         # for p in self.target_dqn.parameters():
         #     p.requires_grad = False
