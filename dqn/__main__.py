@@ -12,12 +12,13 @@ from dqn.agent import DQNAgent
 from dqn.trainer import Trainer
 from dqn.utils import parse_args, Config, Logger
 
+def main():
 
-if __name__=='__main__':
-    
     args = parse_args()
     config = Config.from_json(args.config)
+    
     os.makedirs(config.out_dir, exist_ok=True)
+
     logger = Logger(
         config.out_dir,
         config.rewards_file,
@@ -89,3 +90,7 @@ if __name__=='__main__':
 
     print('Time training:')
     print(training_end - training_start)
+
+if __name__=='__main__':
+    
+    main()
