@@ -80,7 +80,11 @@ def main():
     print('Started training at:')
     print(training_start.strftime("%d/%m/%Y %H:%M:%S"))
 
-    _, best_reward, episode = trainer.fit(config.max_n_epochs, config.target_dqn_update_after, config.ma_reward_n_episodes, config.save_dqn_state_dict)
+    _, best_reward, episode = trainer.fit(
+        config.max_n_epochs,
+        config.target_dqn_update_after,
+        config.ma_reward_n_episodes,
+        config.save_dqn_state_dict)
 
     print(f'Done in {episode} episodes | Best reward: {best_reward}')
 

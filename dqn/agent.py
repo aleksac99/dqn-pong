@@ -6,12 +6,13 @@ class DQNAgent:
 
     def __init__(self, dqn, epsilon_start, epsilon_decay_limit, epsilon_end, device) -> None:
         
-        self.epsilon_start = epsilon_start
-        self.epsilon_end = epsilon_end
-        self.epsilon_decay_limit = epsilon_decay_limit
         self.dqn = dqn.to(device)
         self.target_dqn = deepcopy(self.dqn).to(device)
         self.target_dqn.eval()
+        
+        self.epsilon_start = epsilon_start
+        self.epsilon_decay_limit = epsilon_decay_limit
+        self.epsilon_end = epsilon_end
         self.device = device
 
     def get_epsilon(self, time):

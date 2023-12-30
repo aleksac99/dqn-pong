@@ -18,24 +18,24 @@ class Trainer:
             logger: Logger,
             gamma,
             batch_size,
-            memory_capacity,
+            replay_memory_size,
             device) -> None:
         
         self.env = env
         self.agent = agent
         self.optimizer = optimizer
         self.criterion = criterion
+        self.lr_scheduler = lr_scheduler
+        self.logger = logger
         self.gamma = gamma
         self.batch_size = batch_size
         self.device = device
-        self.lr_scheduler = lr_scheduler
-        self.logger = logger
 
-        self.replay_memory = deque(maxlen=memory_capacity)
+        self.replay_memory = deque(maxlen=replay_memory_size)
 
 
         self.total_rewards = []
-        self.mean_average_rewards = []
+        self.moving_average_rewards = []
         self.fixed_states = []
         self.fixed_states_q = []
         self.epsilons = []
@@ -77,9 +77,14 @@ class Trainer:
             qs = self.agent.dqn(states)
         return (qs.max(dim=1)[0]).mean().item()
             
-    def fit(self, max_n_episodes, target_dqn_update_after, ma_reward_n_episodes, dqn_state_dict_name):
+    def fit(
+            self,
+            max_n_episodes,
+            target_dqn_update_after,
+            ma_reward_n_episodes,
+            dqn_state_dict_name):
 
-        best_mean_reward = -1e9
+        best_ma_reward = -1e9
         time = 0
 
         for episode in range(max_n_episodes):
@@ -141,17 +146,17 @@ class Trainer:
             self.logger.log_rewards(self.total_rewards)
 
             moving_average_reward = sum(self.total_rewards[-ma_reward_n_episodes:]) / min(len(self.total_rewards), ma_reward_n_episodes)
-            self.mean_average_rewards.append(moving_average_reward)
-            self.logger.log_ma_rewards(self.mean_average_rewards)
+            self.moving_average_rewards.append(moving_average_reward)
+            self.logger.log_ma_rewards(self.moving_average_rewards)
 
             self.epsilons.append(self.agent.get_epsilon(time))
             self.logger.log_epsilons(self.epsilons)
 
             print(f'Time: {time} | Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {moving_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
 
-            if moving_average_reward > best_mean_reward:
+            if moving_average_reward > best_ma_reward:
 
-                best_mean_reward = moving_average_reward
+                best_ma_reward = moving_average_reward
 
                 torch.save(
                     self.agent.dqn.state_dict(),
@@ -163,6 +168,6 @@ class Trainer:
                     self.agent.dqn.state_dict(),
                     os.path.join(self.logger.base_dir, dqn_state_dict_name))
                 
-                return self.total_rewards, best_mean_reward, (episode + 1)
+                return self.total_rewards, best_ma_reward, (episode + 1)
 
-        return self.total_rewards, best_mean_reward, (episode + 1)
+        return self.total_rewards, best_ma_reward, (episode + 1)
