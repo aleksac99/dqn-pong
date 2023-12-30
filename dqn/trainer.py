@@ -138,7 +138,7 @@ class Trainer:
             with open('epsilons.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.epsilons]))
 
-            print(f'Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
+            print(f'Time: {time} | Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
 
             if total_reward > best_reward:
                 best_reward = total_reward
