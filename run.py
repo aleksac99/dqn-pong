@@ -11,6 +11,7 @@ from datetime import datetime
 
 # Parameters
 MEAN_REWARD_BOUND = 19
+DQN_STATE_DICT = 'dqn_state_dict_mar.pt'
 
 GAMMA = 0.99
 BATCH_SIZE = 32
@@ -29,8 +30,14 @@ env = gym.make("ALE/Pong-v5", obs_type='grayscale', frameskip=4)
 env = wrap(env)
 
 state, info = env.reset()
+dqn = DQN(state.shape, env.action_space.n)
+
+if DQN_STATE_DICT is not None:
+    dqn.load_state_dict(torch.load(DQN_STATE_DICT, map_location=device))
+    LEARNING_RATE = 1e-5
+
 agent = DQNAgent(
-    DQN(state.shape, env.action_space.n),
+    dqn,
     EPSILON_START, EPSILON_DECAY, EPSILON_END, device=device)
 optimizer = Adam(agent.dqn.parameters(), LEARNING_RATE, (0.9, 0.999))
 criterion = MSELoss(reduction='mean').to(device)
