@@ -16,12 +16,12 @@ class DQNAgent:
         #     p.requires_grad = False
         self.device = device
 
-    def get_epsilon(self, episode):
-        return max(self.epsilon_end, self.epsilon_start - episode * (self.epsilon_start-self.epsilon_end)/300.)
+    def get_epsilon(self, time):
+        return max(self.epsilon_end, self.epsilon_start - time / 150_000)
 
-    def get_action(self, state, method, actions, episode):
+    def get_action(self, state, method, actions, time):
 
-        epsilon = self.get_epsilon(episode)
+        epsilon = self.get_epsilon(time)
         p = np.random.rand()
 
         if (method !='greedy' and p < epsilon) or (method == 'random'):

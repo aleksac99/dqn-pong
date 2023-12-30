@@ -64,13 +64,12 @@ class Trainer:
     def fit(self, n_episodes):
 
         best_reward = -1e9
+        time = 0
 
         for episode in range(n_episodes):
 
             total_reward = 0.
             next_state, info = self.env.reset()
-
-            time = 0
 
             while True:
 
@@ -87,7 +86,7 @@ class Trainer:
                 'action': action,
                 'reward': reward,
                 'next_state': next_state,
-                'terminal': terminated or truncated}) # NOTE: Maybe terminated only?
+                'terminal': terminated or truncated})
 
                 mini_batch_idx = torch.randperm(len(self.replay_memory))[:self.batch_size]
                 mini_batch = [self.replay_memory[idx] for idx in mini_batch_idx]
@@ -133,11 +132,11 @@ class Trainer:
             with open('mean_average_rewards.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.mean_average_rewards]))
 
-            self.epsilons.append(self.agent.get_epsilon(episode))
+            self.epsilons.append(self.agent.get_epsilon(time))
             with open('epsilons.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.epsilons]))
 
-            print(f'Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(episode):.3f} | Mean max q: {mean_max_q}')
+            print(f'Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
 
             if total_reward > best_reward:
                 best_reward = total_reward
