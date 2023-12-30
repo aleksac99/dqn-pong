@@ -34,7 +34,8 @@ class Trainer:
 
             cur_state = new_state.unsqueeze(0)
 
-            action = self.agent.get_action(cur_state, method='random', actions=self.env.action_space, episode=0)
+            with torch.no_grad():
+                action = self.agent.get_action(cur_state, method='random', actions=self.env.action_space, time=0)
 
             new_state, reward, terminated, truncated, info = self.env.step(action)
 
@@ -76,7 +77,8 @@ class Trainer:
                 time += 1
 
                 cur_state = next_state.unsqueeze(0)
-                action = self.agent.get_action(cur_state, method='eps_greedy', actions=self.env.action_space, episode=episode) # NOTE: with torch.no_grad()?
+                with torch.no_grad():
+                    action = self.agent.get_action(cur_state, method='eps_greedy', actions=self.env.action_space, time=time) # NOTE: with torch.no_grad()?
                 next_state, reward, terminated, truncated, info = self.env.step(action)
                 #self.env.render()
                 total_reward += reward
