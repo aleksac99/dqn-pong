@@ -15,7 +15,7 @@ MEAN_REWARD_BOUND = 19
 GAMMA = 0.99
 BATCH_SIZE = 32
 REPLAY_SIZE = 10_000
-LEARNING_RATE = 5e-4
+LEARNING_RATE = 1e-4
 
 EPSILON_DECAY = 0.9
 EPSILON_START = 1.0
@@ -34,7 +34,7 @@ agent = DQNAgent(
     EPSILON_START, EPSILON_DECAY, EPSILON_END, device=device)
 optimizer = Adam(agent.dqn.parameters(), LEARNING_RATE, (0.9, 0.999))
 criterion = MSELoss(reduction='mean').to(device)
-lr_scheduler = StepLR(optimizer, step_size=200, gamma=0.9)
+lr_scheduler = StepLR(optimizer, step_size=3_000, gamma=0.1)
 trainer = Trainer(env, agent, optimizer, criterion, lr_scheduler, GAMMA, BATCH_SIZE, REPLAY_SIZE, device)
 
 trainer.init_memory_fixed_states(200)
