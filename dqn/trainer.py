@@ -64,7 +64,7 @@ class Trainer:
             
     def fit(self, n_episodes):
 
-        best_reward = -1e9
+        best_mean_reward = -1e9
         time = 0
 
         for episode in range(n_episodes):
@@ -129,8 +129,8 @@ class Trainer:
             with open('total_rewards.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.total_rewards]))
 
-            mean_average_reward = sum(self.total_rewards[-100:])/min(len(self.total_rewards), 100)
-            self.mean_average_rewards.append(mean_average_reward)
+            mean_reward = sum(self.total_rewards[-100:])/min(len(self.total_rewards), 100)
+            self.mean_average_rewards.append(mean_reward)
             with open('mean_average_rewards.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.mean_average_rewards]))
 
@@ -138,21 +138,15 @@ class Trainer:
             with open('epsilons.txt', 'w') as f:
                 f.write("\n".join([str(r) for r in self.epsilons]))
 
-            print(f'Time: {time} | Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_average_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
+            print(f'Time: {time} | Episode {episode+1:3}: | Reward: {total_reward:.3f} | Moving average reward: {mean_reward:.3f} | Epsilon: {self.agent.get_epsilon(time):.3f} | Mean max q: {mean_max_q}')
 
-            if total_reward > best_reward:
-                best_reward = total_reward
+            if mean_reward > best_mean_reward:
+                best_mean_reward = mean_reward
 
-                tr = int(total_reward)
-                name = f'dqn_state_dict_{tr}.pt' if total_reward > 18.5 else 'dqn_state_dict.pt'
-                torch.save(self.agent.dqn.state_dict(), name)
+                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict_best_mar.pt')
 
-            self.best_rewards.append(best_reward)
-            with open('best_rewards.txt', 'w') as f:
-                f.write("\n".join([str(r) for r in self.best_rewards]))
+            if mean_reward>20.:
+                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict_mar20.pt')
+                return self.total_rewards, best_mean_reward, (episode+1)
 
-            if mean_average_reward>19.:
-                torch.save(self.agent.dqn.state_dict(), 'dqn_state_dict_mar.pt')
-                return self.total_rewards, best_reward, (episode+1)
-
-        return self.total_rewards, best_reward, (episode+1)
+        return self.total_rewards, best_mean_reward, (episode+1)
