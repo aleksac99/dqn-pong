@@ -1,0 +1,5 @@
+{
+    "dqn_path": "out\\dqn veca mreza\\dqn_state_dict_mar20.pt",
+    "dqn_type": "large",
+    "out_path": "out_simulate"
+}
