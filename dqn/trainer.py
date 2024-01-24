@@ -3,7 +3,7 @@ from copy import deepcopy
 from collections import deque
 import torch
 
-from .utils import Logger
+from dqn.utils import Logger
 
 
 class Trainer:
