@@ -1,7 +1,7 @@
 from typing import Any
 
 import numpy as np
-from gymnasium import ObservationWrapper, Wrapper
+from gymnasium import ObservationWrapper
 from gymnasium.spaces import Box
 from gymnasium.core import Env
 import cv2
