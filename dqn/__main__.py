@@ -30,7 +30,7 @@ def main():
 
     print(f'Device: {device}')
 
-    env = gym.make("ALE/Pong-v5", obs_type='grayscale', frameskip=4)
+    env = gym.make("ALE/Pong-v5", obs_type='grayscale', frameskip=4, difficulty=3)
     env = wrap(env)
 
     state, info = env.reset()
