@@ -22,5 +22,6 @@
     "epsilons_file": "epsilons.txt",
     "fixed_states_q_file": "fixed_states_q.txt",
     "save_dqn_state_dict": "dqn_state_dict.pt",
-    "dqn_type": "large"
+    "dqn_type": "large",
+    "difficulty": 3
 }
