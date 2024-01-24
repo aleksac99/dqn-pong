@@ -2,12 +2,10 @@ import torch
 import gymnasium as gym
 from gymnasium.wrappers.record_video import RecordVideo
 
-from dqn.wrapper import wrap
-from dqn.model import DQN
+from dqn.wrappers import wrap
+from dqn.models import DQNLarge, DQNOriginal
 from dqn.agent import DQNAgent
 from dqn.utils import Config, parse_args
-
-# TODO: VECA MREZA: 9:06 + 16:37 - (213 epizoda za zagrevanje)
 
 def main():
 
@@ -25,7 +23,7 @@ def simulate(config):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     state, _ = env.reset()
-    dqn = DQN(state.shape, env.action_space.n)
+    dqn = DQNLarge(state.shape, env.action_space.n) if config.dqn_type=='large' else DQNOriginal(state.shape, env.action_space.n)
     dqn.load_state_dict(torch.load(config.dqn_path, map_location=device))
     agent = DQNAgent(dqn, 0.01, 1, 0.01, device)
         
