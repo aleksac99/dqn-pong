@@ -6,8 +6,8 @@ from torch.optim.lr_scheduler import StepLR
 from torch.nn import MSELoss
 import gymnasium as gym
 
-from dqn.wrapper import wrap
-from dqn.model_original import DQN
+from dqn.wrappers import wrap
+from dqn.models import DQNOriginal, DQNLarge
 from dqn.agent import DQNAgent
 from dqn.trainer import Trainer
 from dqn.utils import parse_args, Config, Logger
@@ -35,7 +35,8 @@ def main():
 
     state, info = env.reset()
 
-    dqn = DQN(state.shape, env.action_space.n)
+    dqn = DQNOriginal(state.shape, env.action_space.n) if config.dqn_type=='original' else DQNLarge(state.shape, env.action_space.n)
+    print(dqn)
 
     if config.load_dqn_state_dict is not None:
         dqn.load_state_dict(torch.load(config.dqn_state_dict, map_location=device))
