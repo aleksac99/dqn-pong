@@ -9,7 +9,7 @@ This project was a part of my Machine Learning class.
 First, clone this repo from GitHub:
 
 ```shell
-git clone https://github.com/aleksac99/dqn_test/
+git clone https://github.com/aleksac99/dqn-pong/
 ```
 
 This project is written as an installable library. To install it, run:
