@@ -21,5 +21,6 @@
     "ma_rewards_file": "ma_rewards.txt",
     "epsilons_file": "epsilons.txt",
     "fixed_states_q_file": "fixed_states_q.txt",
-    "save_dqn_state_dict": "dqn_state_dict.pt"
+    "save_dqn_state_dict": "dqn_state_dict.pt",
+    "dqn_type": "large"
 }
