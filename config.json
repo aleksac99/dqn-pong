@@ -16,7 +16,7 @@
     "max_n_epochs": 10000,
     "target_dqn_update_after": 1000,
     "ma_reward_n_episodes": 100,
-    "out_dir": "out/out_test_config",
+    "out_dir": "out",
     "rewards_file": "rewards.txt",
     "ma_rewards_file": "ma_rewards.txt",
     "epsilons_file": "epsilons.txt",
