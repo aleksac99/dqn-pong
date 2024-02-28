@@ -162,3 +162,5 @@ cython_debug/
 .vscode
 out
 out_untrained
+out2
+video
